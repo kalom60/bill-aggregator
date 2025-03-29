@@ -8,7 +8,7 @@ type RequestPayload struct {
 
 func (app *Config) Broker(c *gin.Context) {
 	c.JSON(200, gin.H{
-		"Error":   false,
-		"Message": "Hit the broker",
+		"error":   false,
+		"message": "Hit the broker",
 	})
 }
