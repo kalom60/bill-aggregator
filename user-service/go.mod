@@ -1,4 +1,4 @@
-module user-service
+module github.com/kalom60/bill-aggregator/user-service
 
 go 1.23.0
 
