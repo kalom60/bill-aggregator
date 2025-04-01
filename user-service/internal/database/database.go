@@ -6,10 +6,10 @@ import (
 	"fmt"
 	"log"
 	"os"
-	"user-service/internal/models"
 
 	_ "github.com/jackc/pgx/v5/stdlib"
 	_ "github.com/joho/godotenv/autoload"
+	"github.com/kalom60/bill-aggregator/user-service/internal/models"
 )
 
 type Service interface {

@@ -2,9 +2,9 @@ package server
 
 import (
 	"net/http"
-	"user-service/pkg/middlewares"
 
 	"github.com/gin-gonic/gin"
+	"github.com/kalom60/bill-aggregator/user-service/pkg/middlewares"
 )
 
 func (s *Server) RegisterRoutes() http.Handler {

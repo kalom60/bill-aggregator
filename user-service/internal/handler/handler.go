@@ -2,11 +2,11 @@ package handler
 
 import (
 	"net/http"
-	"user-service/internal/database"
-	"user-service/internal/models"
-	"user-service/pkg/middlewares"
 
 	"github.com/gin-gonic/gin"
+	"github.com/kalom60/bill-aggregator/user-service/internal/database"
+	"github.com/kalom60/bill-aggregator/user-service/internal/models"
+	"github.com/kalom60/bill-aggregator/user-service/pkg/middlewares"
 	"golang.org/x/crypto/bcrypt"
 )
 

@@ -3,10 +3,10 @@ package middlewares
 import (
 	"net/http"
 	"strings"
-	"user-service/internal/models"
 
 	"github.com/gin-gonic/gin"
 	"github.com/go-playground/validator/v10"
+	"github.com/kalom60/bill-aggregator/user-service/internal/models"
 )
 
 func SignupMiddleware(c *gin.Context) {

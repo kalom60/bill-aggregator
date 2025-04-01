@@ -5,9 +5,8 @@ import (
 	"net/http"
 
 	_ "github.com/joho/godotenv/autoload"
-
-	"user-service/internal/database"
-	"user-service/internal/handler"
+	"github.com/kalom60/bill-aggregator/user-service/internal/database"
+	"github.com/kalom60/bill-aggregator/user-service/internal/handler"
 )
 
 type Server struct {

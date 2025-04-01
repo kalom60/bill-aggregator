@@ -2,7 +2,8 @@ package main
 
 import (
 	"fmt"
-	"user-service/internal/server"
+
+	"github.com/kalom60/bill-aggregator/user-service/internal/server"
 )
 
 func main() {
