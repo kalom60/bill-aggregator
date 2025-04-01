@@ -20,6 +20,7 @@ func (app *Config) RegisterRoutes() http.Handler {
 	}))
 
 	r.POST("/", app.Broker)
+	r.POST("/handle", app.HandleSubmission)
 
 	return r
 }
