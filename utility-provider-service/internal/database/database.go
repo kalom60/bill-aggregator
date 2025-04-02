@@ -13,7 +13,7 @@ import (
 
 type Service interface {
 	InsertOne(name, api_url, authentication_typem, api_key string) error
-	FetchProviders() (*[]models.Provider, error)
+	FetchProviders() ([]models.Provider, error)
 	Close() error
 }
 
@@ -24,16 +24,15 @@ type service struct {
 var dbInstance *service
 
 func New() Service {
-	dsn := fmt.Sprintf("postgres://%s:%s@%s:%s/%s?sslmode=%s",
+	dsn := fmt.Sprintf("postgres://%s:%s@%s:%s/%s?sslmode=%s&search_path=%s",
 		os.Getenv("POSTGRES_USER"),
 		os.Getenv("POSTGRES_PASSWORD"),
 		os.Getenv("POSTGRES_HOST"),
 		os.Getenv("POSTGRES_PORT"),
 		os.Getenv("POSTGRES_DB"),
 		os.Getenv("POSTGRES_SSLMODE"),
+		os.Getenv("DB_SCHEMA"),
 	)
-
-	RunMigrations(dsn)
 
 	if dbInstance != nil {
 		return dbInstance
@@ -45,6 +44,11 @@ func New() Service {
 	}
 	dbInstance = &service{
 		db: db,
+	}
+
+	err = RunMigrations(db)
+	if err != nil {
+		log.Fatal(err)
 	}
 	return dbInstance
 }
@@ -59,24 +63,24 @@ func (s *service) InsertOne(name, api_url, authentication_type, api_key string) 
 	return nil
 }
 
-func (s *service) FetchProviders() (*[]models.Provider, error) {
+func (s *service) FetchProviders() ([]models.Provider, error) {
 	query := `SELECT * FROM providers`
 	rows, err := s.db.Query(query)
 	if err != nil {
-		return &[]models.Provider{}, err
+		return []models.Provider{}, err
 	}
 	defer rows.Close()
 
 	var providers []models.Provider
 	for rows.Next() {
 		var p models.Provider
-		if err := rows.Scan(&p.ID, &p.Name, &p.API_URL, &p.Authentication_Type, &p.CreatedAt); err != nil {
-			return &[]models.Provider{}, err
+		if err := rows.Scan(&p.ID, &p.Name, &p.API_URL, &p.Authentication_Type, &p.API_key, &p.CreatedAt, &p.UpdatedAt); err != nil {
+			return []models.Provider{}, err
 		}
 		providers = append(providers, p)
 	}
 
-	return &providers, nil
+	return providers, nil
 }
 
 func (s *service) Close() error {
