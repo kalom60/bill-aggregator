@@ -2,6 +2,7 @@ package database
 
 import (
 	"database/sql"
+	"errors"
 	"fmt"
 	"log"
 	"os"
@@ -13,6 +14,7 @@ import (
 
 type Service interface {
 	InsertOne(name, api_url, authentication_typem, api_key string) error
+	FetchProviderByID(id string) (*models.Provider, error)
 	FetchProviders() ([]models.Provider, error)
 	Close() error
 }
@@ -61,6 +63,38 @@ func (s *service) InsertOne(name, api_url, authentication_type, api_key string) 
 		return err
 	}
 	return nil
+}
+
+var ErrProviderNotFound = errors.New("provider not found")
+
+func (s *service) FetchProviderByID(id string) (*models.Provider, error) {
+	query := `
+        SELECT id, name, api_url, authentication_type, api_key, created_at, updated_at
+        FROM providers
+        WHERE id = $1
+    `
+
+	row := s.db.QueryRow(query, id)
+
+	var provider models.Provider
+	err := row.Scan(
+		&provider.ID,
+		&provider.Name,
+		&provider.API_URL,
+		&provider.Authentication_Type,
+		&provider.API_key,
+		&provider.CreatedAt,
+		&provider.UpdatedAt,
+	)
+
+	switch {
+	case errors.Is(err, sql.ErrNoRows):
+		return nil, fmt.Errorf("provider not found: %w", ErrProviderNotFound)
+	case err != nil:
+		return nil, fmt.Errorf("error fetching provider: %w", err)
+	default:
+		return &provider, nil
+	}
 }
 
 func (s *service) FetchProviders() ([]models.Provider, error) {
