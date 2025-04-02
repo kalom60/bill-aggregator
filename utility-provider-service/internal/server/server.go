@@ -6,32 +6,36 @@ import (
 
 	_ "github.com/joho/godotenv/autoload"
 	"github.com/kalom60/bill-aggregator/utility-provider-service/internal/database"
+	"github.com/kalom60/bill-aggregator/utility-provider-service/internal/grpc"
 	"github.com/kalom60/bill-aggregator/utility-provider-service/internal/handler"
 )
 
 type Server struct {
-	port int
-
+	port    int
 	db      database.Service
 	handler handler.Handler
 }
 
-func NewServer() *http.Server {
+func NewServer() *Server {
 	db := database.New()
-
 	handler := handler.NewHandler(db)
 
-	NewServer := &Server{
-		port: 80,
-
+	return &Server{
+		port:    80,
 		db:      db,
 		handler: handler,
 	}
 
+}
+
+func (s *Server) ListenAndServe() error {
+	go grpc.StartGRPCListen(s.db)
+
 	server := &http.Server{
-		Addr:    fmt.Sprintf(":%d", NewServer.port),
-		Handler: NewServer.RegisterRoutes(),
+		Addr:    fmt.Sprintf(":%d", s.port),
+		Handler: s.RegisterRoutes(),
 	}
 
-	return server
+	fmt.Printf("HTTP server running on port %d\n", s.port)
+	return server.ListenAndServe()
 }
