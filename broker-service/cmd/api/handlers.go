@@ -3,6 +3,7 @@ package main
 import (
 	"bytes"
 	"encoding/json"
+	"fmt"
 	"net/http"
 
 	"github.com/gin-gonic/gin"
@@ -10,10 +11,12 @@ import (
 )
 
 type RequestPayload struct {
-	Action         string                `json:"action"`
-	UserRegister   UserRegisterPayload   `json:"user_register,omitempty"`
-	UserLogin      UserLoginPayload      `json:"user_login,omitempty"`
-	CreateProvider CreateProviderPayload `json:"create_provider,omitempty"`
+	Action              string                     `json:"action"`
+	UserRegister        UserRegisterPayload        `json:"user_register,omitempty"`
+	UserLogin           UserLoginPayload           `json:"user_login,omitempty"`
+	CreateProvider      CreateProviderPayload      `json:"create_provider,omitempty"`
+	LinkAccount         LinkAccountPayload         `json:"link_account,omitempty"`
+	DeleteLinkedAccount DeleteLinkedAccountPayload `json:"delete_linked_account,omitempty"`
 }
 
 type JsonResponse struct {
@@ -39,6 +42,17 @@ type CreateProviderPayload struct {
 	APIURL             string `json:"api_url"`
 	AuthenticationType string `json:"authentication_type"`
 	APIKey             string `json:"api_key"`
+}
+
+type LinkAccountPayload struct {
+	UserID              string `json:"user_id,omitempty"`
+	ProviderID          string `json:"provider_id"`
+	AccountIdentifier   string `json:"account_identifier"`
+	EncryptedCredential string `json:"encrypted_credential"`
+}
+
+type DeleteLinkedAccountPayload struct {
+	AccountID string `json:"account_id"`
 }
 
 func (app *Config) Broker(c *gin.Context) {
@@ -68,6 +82,37 @@ func (app *Config) HandleSubmission(c *gin.Context) {
 		app.CreateProvider(c, req.CreateProvider)
 	case "get_provider":
 		app.GetProvider(c)
+	case "link_account":
+		user_id, exists := c.Get("userID")
+		if !exists {
+			c.JSON(http.StatusInternalServerError, gin.H{"error": true, "message": "Authentication failed"})
+			return
+		}
+
+		if userIDStr, ok := user_id.(string); ok {
+			req.LinkAccount.UserID = userIDStr
+		} else {
+			c.JSON(http.StatusInternalServerError, gin.H{"error": true, "message": "Invalid user ID format"})
+			return
+		}
+
+		app.LinkAccount(c, req.LinkAccount)
+	case "get_linked_accounts":
+		user_id, exists := c.Get("userID")
+		if !exists {
+			c.JSON(http.StatusInternalServerError, gin.H{"error": true, "message": "Authentication failed"})
+			return
+		}
+
+		userIDStr, ok := user_id.(string)
+		if !ok {
+			c.JSON(http.StatusInternalServerError, gin.H{"error": true, "message": "Invalid user ID format"})
+			return
+		}
+
+		app.GetLinkedAcounts(c, userIDStr)
+	case "delete_linked_account":
+		app.DeleteLinkedAccount(c, req.DeleteLinkedAccount)
 	default:
 		c.JSON(http.StatusBadRequest, gin.H{"error": true, "message": "Unknown action"})
 	}
@@ -87,6 +132,20 @@ func (app *Config) CreateProvider(c *gin.Context, payload CreateProviderPayload)
 
 func (app *Config) GetProvider(c *gin.Context) {
 	app.forwardRequest(c, "GET", "http://utility-provider-service/provider", nil)
+}
+
+func (app *Config) LinkAccount(c *gin.Context, payload LinkAccountPayload) {
+	app.forwardRequest(c, "POST", "http://account-linking-service/accounts/link", payload)
+}
+
+func (app *Config) GetLinkedAcounts(c *gin.Context, userID string) {
+	url := fmt.Sprintf("http://account-linking-service/accounts/%s", userID)
+	app.forwardRequest(c, "GET", url, nil)
+}
+
+func (app *Config) DeleteLinkedAccount(c *gin.Context, payload DeleteLinkedAccountPayload) {
+	url := fmt.Sprintf("http://account-linking-service/accounts/%s", payload.AccountID)
+	app.forwardRequest(c, "DELETE", url, nil)
 }
 
 func (app *Config) forwardRequest(c *gin.Context, method, url string, payload any) {
