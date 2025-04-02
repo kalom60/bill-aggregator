@@ -1,30 +1,32 @@
 package database
 
 import (
-	"log"
+	"database/sql"
+	"fmt"
+	"os"
 	"path/filepath"
 
-	"github.com/golang-migrate/migrate/v4"
 	_ "github.com/golang-migrate/migrate/v4/database/postgres"
 	_ "github.com/golang-migrate/migrate/v4/source/file"
 )
 
-func RunMigrations(dbURL string) {
-	absPath, err := filepath.Abs("internal/database/migrations")
+func RunMigrations(db *sql.DB) error {
+	migrations, err := filepath.Glob("./internal/database/migrations/*.up.sql")
 	if err != nil {
-		log.Fatalf("Failed to get absolute path: %v", err)
+		return err
 	}
 
-	migrationPath := "file://" + absPath
+	for _, migration := range migrations {
+		content, err := os.ReadFile(migration)
+		if err != nil {
+			return err
+		}
 
-	m, err := migrate.New(migrationPath, dbURL)
-	if err != nil {
-		log.Fatalf("Migration failed: %v", err)
+		_, err = db.Exec(string(content))
+		if err != nil {
+			return fmt.Errorf("failed to execute %s: %w", migration, err)
+		}
 	}
 
-	if err := m.Up(); err != nil && err != migrate.ErrNoChange {
-		log.Fatalf("Migration failed: %v", err)
-	}
-
-	log.Println("Database migrated successfully!")
+	return nil
 }
