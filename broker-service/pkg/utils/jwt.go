@@ -24,8 +24,7 @@ func VerifyToken(token string) (string, string, error) {
 		return "", "", errors.New("Could not parse token.")
 	}
 
-	tokenIsValid := parsedToken.Valid
-	if !tokenIsValid {
+	if !parsedToken.Valid {
 		return "", "", errors.New("Invalid token.")
 	}
 
@@ -34,7 +33,12 @@ func VerifyToken(token string) (string, string, error) {
 		return "", "", errors.New("Invalid token claims.")
 	}
 
-	email := claims["email"].(string)
-	userID := claims["userID"].(string)
+	email, emailOK := claims["email"].(string)
+	userID, userOK := claims["user_id"].(string)
+
+	if !emailOK || !userOK {
+		return "", "", errors.New("Invalid token claims: missing email or userID")
+	}
+
 	return userID, email, nil
 }
