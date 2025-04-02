@@ -1,10 +1,12 @@
 package handler
 
 import (
+	"fmt"
 	"net/http"
 
 	"github.com/gin-gonic/gin"
 	"github.com/kalom60/bill-aggregator/account-linking-service/internal/database"
+	"github.com/kalom60/bill-aggregator/account-linking-service/internal/grpc"
 	"github.com/kalom60/bill-aggregator/account-linking-service/internal/models"
 	"golang.org/x/crypto/bcrypt"
 )
@@ -16,12 +18,14 @@ type Handler interface {
 }
 
 type handler struct {
-	client database.Service
+	client     database.Service
+	gRPCClient *grpc.ProviderClient
 }
 
-func NewHandler(client database.Service) Handler {
+func NewHandler(client database.Service, gRPCClient *grpc.ProviderClient) Handler {
 	return &handler{
-		client: client,
+		client:     client,
+		gRPCClient: gRPCClient,
 	}
 }
 
@@ -33,6 +37,18 @@ func (h *handler) LinkAccount(c *gin.Context) {
 	}
 
 	req := validatedAccount.(models.Account)
+
+	exists, err := h.gRPCClient.IsProviderExist(req.ProviderID)
+	if err != nil {
+		fmt.Println("error 1", err)
+		c.JSON(http.StatusInternalServerError, gin.H{"error": true, "message": "Failed to validate provider"})
+		return
+	}
+
+	if !exists {
+		c.JSON(http.StatusBadRequest, gin.H{"error": true, "message": "Provider does not exist"})
+		return
+	}
 
 	hashedPassword, err := bcrypt.GenerateFromPassword([]byte(req.EncryptedCredential), bcrypt.DefaultCost)
 	if err != nil {
