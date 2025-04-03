@@ -6,8 +6,19 @@ option go_package = "github.com/kalom60/bill-aggregator/utility-provider-service
 
 service ProviderService {
   rpc IsProviderExist(ProviderRequest) returns (ProviderResponse);
+  rpc GetProvider(GetProviderRequest) returns (GetProviderResponse);
 }
 
 message ProviderRequest { string provider_id = 1; }
 
 message ProviderResponse { bool exist = 1; }
+
+message GetProviderRequest { string provider_id = 1; }
+
+message GetProviderResponse {
+  string id = 1;
+  string name = 2;
+  string api_url = 3;
+  string authentication_type = 4;
+  string api_key = 5;
+}

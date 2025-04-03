@@ -20,6 +20,7 @@ const _ = grpc.SupportPackageIsVersion9
 
 const (
 	ProviderService_IsProviderExist_FullMethodName = "/provider.ProviderService/IsProviderExist"
+	ProviderService_GetProvider_FullMethodName     = "/provider.ProviderService/GetProvider"
 )
 
 // ProviderServiceClient is the client API for ProviderService service.
@@ -27,6 +28,7 @@ const (
 // For semantics around ctx use and closing/ending streaming RPCs, please refer to https://pkg.go.dev/google.golang.org/grpc/?tab=doc#ClientConn.NewStream.
 type ProviderServiceClient interface {
 	IsProviderExist(ctx context.Context, in *ProviderRequest, opts ...grpc.CallOption) (*ProviderResponse, error)
+	GetProvider(ctx context.Context, in *GetProviderRequest, opts ...grpc.CallOption) (*GetProviderResponse, error)
 }
 
 type providerServiceClient struct {
@@ -47,11 +49,22 @@ func (c *providerServiceClient) IsProviderExist(ctx context.Context, in *Provide
 	return out, nil
 }
 
+func (c *providerServiceClient) GetProvider(ctx context.Context, in *GetProviderRequest, opts ...grpc.CallOption) (*GetProviderResponse, error) {
+	cOpts := append([]grpc.CallOption{grpc.StaticMethod()}, opts...)
+	out := new(GetProviderResponse)
+	err := c.cc.Invoke(ctx, ProviderService_GetProvider_FullMethodName, in, out, cOpts...)
+	if err != nil {
+		return nil, err
+	}
+	return out, nil
+}
+
 // ProviderServiceServer is the server API for ProviderService service.
 // All implementations must embed UnimplementedProviderServiceServer
 // for forward compatibility.
 type ProviderServiceServer interface {
 	IsProviderExist(context.Context, *ProviderRequest) (*ProviderResponse, error)
+	GetProvider(context.Context, *GetProviderRequest) (*GetProviderResponse, error)
 	mustEmbedUnimplementedProviderServiceServer()
 }
 
@@ -64,6 +77,9 @@ type UnimplementedProviderServiceServer struct{}
 
 func (UnimplementedProviderServiceServer) IsProviderExist(context.Context, *ProviderRequest) (*ProviderResponse, error) {
 	return nil, status.Errorf(codes.Unimplemented, "method IsProviderExist not implemented")
+}
+func (UnimplementedProviderServiceServer) GetProvider(context.Context, *GetProviderRequest) (*GetProviderResponse, error) {
+	return nil, status.Errorf(codes.Unimplemented, "method GetProvider not implemented")
 }
 func (UnimplementedProviderServiceServer) mustEmbedUnimplementedProviderServiceServer() {}
 func (UnimplementedProviderServiceServer) testEmbeddedByValue()                         {}
@@ -104,6 +120,24 @@ func _ProviderService_IsProviderExist_Handler(srv interface{}, ctx context.Conte
 	return interceptor(ctx, in, info, handler)
 }
 
+func _ProviderService_GetProvider_Handler(srv interface{}, ctx context.Context, dec func(interface{}) error, interceptor grpc.UnaryServerInterceptor) (interface{}, error) {
+	in := new(GetProviderRequest)
+	if err := dec(in); err != nil {
+		return nil, err
+	}
+	if interceptor == nil {
+		return srv.(ProviderServiceServer).GetProvider(ctx, in)
+	}
+	info := &grpc.UnaryServerInfo{
+		Server:     srv,
+		FullMethod: ProviderService_GetProvider_FullMethodName,
+	}
+	handler := func(ctx context.Context, req interface{}) (interface{}, error) {
+		return srv.(ProviderServiceServer).GetProvider(ctx, req.(*GetProviderRequest))
+	}
+	return interceptor(ctx, in, info, handler)
+}
+
 // ProviderService_ServiceDesc is the grpc.ServiceDesc for ProviderService service.
 // It's only intended for direct use with grpc.RegisterService,
 // and not to be introspected or modified (even as a copy)
@@ -114,6 +148,10 @@ var ProviderService_ServiceDesc = grpc.ServiceDesc{
 		{
 			MethodName: "IsProviderExist",
 			Handler:    _ProviderService_IsProviderExist_Handler,
+		},
+		{
+			MethodName: "GetProvider",
+			Handler:    _ProviderService_GetProvider_Handler,
 		},
 	},
 	Streams:  []grpc.StreamDesc{},
