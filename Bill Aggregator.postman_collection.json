@@ -1,0 +1,577 @@
+{
+	"info": {
+		"_postman_id": "e7d04be7-7c55-4920-ab62-8292595eefb1",
+		"name": "Bill Aggregator",
+		"schema": "https://schema.getpostman.com/json/collection/v2.1.0/collection.json",
+		"_exporter_id": "16402862"
+	},
+	"item": [
+		{
+			"name": "Gateway",
+			"item": [
+				{
+					"name": "API Gateway",
+					"request": {
+						"method": "POST",
+						"header": [],
+						"url": {
+							"raw": "http://localhost:8080/",
+							"protocol": "http",
+							"host": [
+								"localhost"
+							],
+							"port": "8080",
+							"path": [
+								""
+							]
+						}
+					},
+					"response": []
+				}
+			]
+		},
+		{
+			"name": "User Service",
+			"item": [
+				{
+					"name": "Create User",
+					"request": {
+						"method": "POST",
+						"header": [],
+						"body": {
+							"mode": "raw",
+							"raw": "{\n    \"action\": \"user_register\",\n    \"user_register\": {\n        \"email\": \"joe@gmail.com\",\n        \"password\": \"password\",\n        \"first_name\": \"jon\",\n        \"last_name\": \"doe\"\n    }\n}",
+							"options": {
+								"raw": {
+									"language": "json"
+								}
+							}
+						},
+						"url": {
+							"raw": "http://localhost:8080/handle",
+							"protocol": "http",
+							"host": [
+								"localhost"
+							],
+							"port": "8080",
+							"path": [
+								"handle"
+							]
+						}
+					},
+					"response": []
+				},
+				{
+					"name": "Login User",
+					"request": {
+						"method": "POST",
+						"header": [],
+						"body": {
+							"mode": "raw",
+							"raw": "{\n    \"action\": \"user_login\",\n    \"user_login\": {\n        \"email\": \"joe@gmail.com\",\n        \"password\": \"password\"\n    }\n}",
+							"options": {
+								"raw": {
+									"language": "json"
+								}
+							}
+						},
+						"url": {
+							"raw": "http://localhost:8080/handle",
+							"protocol": "http",
+							"host": [
+								"localhost"
+							],
+							"port": "8080",
+							"path": [
+								"handle"
+							]
+						}
+					},
+					"response": []
+				}
+			]
+		},
+		{
+			"name": "Utility Provider Service",
+			"item": [
+				{
+					"name": "Create Provider",
+					"request": {
+						"auth": {
+							"type": "bearer",
+							"bearer": [
+								{
+									"key": "token",
+									"value": "eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJlbWFpbCI6ImpvZUBnbWFpbC5jb20iLCJleHAiOjE3NDM3OTkwNzUsInVzZXJfaWQiOiI4MjFiN2ZhOS1mMzQ5LTQ4NjQtYTBiNi05NjZjODY3OWI3ZmIifQ.AHc6YBjClHsEngOH3GrfYDE3rg9LY3GP7DTRpebgk84",
+									"type": "string"
+								}
+							]
+						},
+						"method": "POST",
+						"header": [],
+						"body": {
+							"mode": "raw",
+							"raw": "{\n    \"action\": \"create_provider\",\n    \"create_provider\": {\n        \"name\": \"Internet Provider A\",\n        \"api_url\": \"http://mock-api-service/internet\",\n        \"authentication_type\": \"API Key\",\n        \"api_key\": \"c68cdd9a-e1ff-4d24-8ca9-b5fe18a649c8\"\n    }\n}",
+							"options": {
+								"raw": {
+									"language": "json"
+								}
+							}
+						},
+						"url": {
+							"raw": "http://localhost:8080/handle",
+							"protocol": "http",
+							"host": [
+								"localhost"
+							],
+							"port": "8080",
+							"path": [
+								"handle"
+							]
+						}
+					},
+					"response": []
+				},
+				{
+					"name": "Get Provider",
+					"request": {
+						"auth": {
+							"type": "bearer",
+							"bearer": [
+								{
+									"key": "token",
+									"value": "eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJlbWFpbCI6ImpvZUBnbWFpbC5jb20iLCJleHAiOjE3NDM3OTkwNzUsInVzZXJfaWQiOiI4MjFiN2ZhOS1mMzQ5LTQ4NjQtYTBiNi05NjZjODY3OWI3ZmIifQ.AHc6YBjClHsEngOH3GrfYDE3rg9LY3GP7DTRpebgk84",
+									"type": "string"
+								}
+							]
+						},
+						"method": "POST",
+						"header": [],
+						"body": {
+							"mode": "raw",
+							"raw": "{\n    \"action\": \"get_provider\"\n}",
+							"options": {
+								"raw": {
+									"language": "json"
+								}
+							}
+						},
+						"url": {
+							"raw": "http://localhost:8080/handle",
+							"protocol": "http",
+							"host": [
+								"localhost"
+							],
+							"port": "8080",
+							"path": [
+								"handle"
+							]
+						}
+					},
+					"response": []
+				}
+			]
+		},
+		{
+			"name": "Account Linking Service",
+			"item": [
+				{
+					"name": "Link Account",
+					"request": {
+						"auth": {
+							"type": "bearer",
+							"bearer": [
+								{
+									"key": "token",
+									"value": "eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJlbWFpbCI6ImpvZUBnbWFpbC5jb20iLCJleHAiOjE3NDM3OTkwNzUsInVzZXJfaWQiOiI4MjFiN2ZhOS1mMzQ5LTQ4NjQtYTBiNi05NjZjODY3OWI3ZmIifQ.AHc6YBjClHsEngOH3GrfYDE3rg9LY3GP7DTRpebgk84",
+									"type": "string"
+								}
+							]
+						},
+						"method": "POST",
+						"header": [],
+						"body": {
+							"mode": "raw",
+							"raw": "{\n    \"action\": \"link_account\",\n    \"link_account\": {\n        \"provider_id\": \"6713550d-dcbe-4f3a-8e46-286c936b6e8d\",\n        \"account_identifier\": \"API Key\",\n        \"encrypted_credential\": \"random key\"\n    }\n}",
+							"options": {
+								"raw": {
+									"language": "json"
+								}
+							}
+						},
+						"url": {
+							"raw": "http://localhost:8080/handle",
+							"protocol": "http",
+							"host": [
+								"localhost"
+							],
+							"port": "8080",
+							"path": [
+								"handle"
+							]
+						}
+					},
+					"response": []
+				},
+				{
+					"name": "Get User Linked Accounts",
+					"request": {
+						"auth": {
+							"type": "bearer",
+							"bearer": [
+								{
+									"key": "token",
+									"value": "eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJlbWFpbCI6ImpvZUBnbWFpbC5jb20iLCJleHAiOjE3NDM3OTkwNzUsInVzZXJfaWQiOiI4MjFiN2ZhOS1mMzQ5LTQ4NjQtYTBiNi05NjZjODY3OWI3ZmIifQ.AHc6YBjClHsEngOH3GrfYDE3rg9LY3GP7DTRpebgk84",
+									"type": "string"
+								}
+							]
+						},
+						"method": "POST",
+						"header": [],
+						"body": {
+							"mode": "raw",
+							"raw": "{\n    \"action\": \"get_linked_accounts\"\n}",
+							"options": {
+								"raw": {
+									"language": "json"
+								}
+							}
+						},
+						"url": {
+							"raw": "http://localhost:8080/handle",
+							"protocol": "http",
+							"host": [
+								"localhost"
+							],
+							"port": "8080",
+							"path": [
+								"handle"
+							]
+						}
+					},
+					"response": []
+				},
+				{
+					"name": "Delete Linked Account",
+					"request": {
+						"auth": {
+							"type": "bearer",
+							"bearer": [
+								{
+									"key": "token",
+									"value": "eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJlbWFpbCI6ImpvZUBnbWFpbC5jb20iLCJleHAiOjE3NDM3OTkwNzUsInVzZXJfaWQiOiI4MjFiN2ZhOS1mMzQ5LTQ4NjQtYTBiNi05NjZjODY3OWI3ZmIifQ.AHc6YBjClHsEngOH3GrfYDE3rg9LY3GP7DTRpebgk84",
+									"type": "string"
+								}
+							]
+						},
+						"method": "POST",
+						"header": [],
+						"body": {
+							"mode": "raw",
+							"raw": "{\n    \"action\": \"delete_linked_account\",\n    \"delete_linked_account\": {\n        \"account_id\": \"fa2c9c16-dab0-413f-9c18-b93fdf7ac448\"\n    }\n}",
+							"options": {
+								"raw": {
+									"language": "json"
+								}
+							}
+						},
+						"url": {
+							"raw": "http://localhost:8080/handle",
+							"protocol": "http",
+							"host": [
+								"localhost"
+							],
+							"port": "8080",
+							"path": [
+								"handle"
+							]
+						}
+					},
+					"response": []
+				}
+			]
+		},
+		{
+			"name": "Mock API",
+			"item": [
+				{
+					"name": "User A",
+					"item": [
+						{
+							"name": "Get Water Bills",
+							"request": {
+								"method": "GET",
+								"header": [],
+								"url": {
+									"raw": "http://localhost:8084/water/c68cdd9a-e1ff-4d24-8ca9-b5fe18a649c8",
+									"protocol": "http",
+									"host": [
+										"localhost"
+									],
+									"port": "8084",
+									"path": [
+										"water",
+										"c68cdd9a-e1ff-4d24-8ca9-b5fe18a649c8"
+									]
+								}
+							},
+							"response": []
+						},
+						{
+							"name": "Get Electric Bills",
+							"request": {
+								"method": "GET",
+								"header": [],
+								"url": {
+									"raw": "http://localhost:8084/electric/c68cdd9a-e1ff-4d24-8ca9-b5fe18a649c8",
+									"protocol": "http",
+									"host": [
+										"localhost"
+									],
+									"port": "8084",
+									"path": [
+										"electric",
+										"c68cdd9a-e1ff-4d24-8ca9-b5fe18a649c8"
+									]
+								}
+							},
+							"response": []
+						},
+						{
+							"name": "Get Internet Bills",
+							"request": {
+								"method": "GET",
+								"header": [],
+								"url": {
+									"raw": "http://localhost:8084/internet/c68cdd9a-e1ff-4d24-8ca9-b5fe18a649c8",
+									"protocol": "http",
+									"host": [
+										"localhost"
+									],
+									"port": "8084",
+									"path": [
+										"internet",
+										"c68cdd9a-e1ff-4d24-8ca9-b5fe18a649c8"
+									]
+								}
+							},
+							"response": []
+						},
+						{
+							"name": "Update Water Bill",
+							"request": {
+								"method": "PATCH",
+								"header": [],
+								"body": {
+									"mode": "raw",
+									"raw": "{\n    \"amount\": 500\n}",
+									"options": {
+										"raw": {
+											"language": "json"
+										}
+									}
+								},
+								"url": {
+									"raw": "http://localhost:8084/water",
+									"protocol": "http",
+									"host": [
+										"localhost"
+									],
+									"port": "8084",
+									"path": [
+										"water"
+									]
+								}
+							},
+							"response": []
+						}
+					]
+				},
+				{
+					"name": "User B",
+					"item": [
+						{
+							"name": "Get Water Bills",
+							"request": {
+								"method": "GET",
+								"header": [],
+								"url": {
+									"raw": "http://localhost:8084/water/8ca9-b5fe18a649c8-4d24-c68cdd9a-e1ff",
+									"protocol": "http",
+									"host": [
+										"localhost"
+									],
+									"port": "8084",
+									"path": [
+										"water",
+										"8ca9-b5fe18a649c8-4d24-c68cdd9a-e1ff"
+									]
+								}
+							},
+							"response": []
+						},
+						{
+							"name": "Get Electric Bills",
+							"request": {
+								"method": "GET",
+								"header": [],
+								"url": {
+									"raw": "http://localhost:8084/electric/8ca9-b5fe18a649c8-4d24-c68cdd9a-e1ff",
+									"protocol": "http",
+									"host": [
+										"localhost"
+									],
+									"port": "8084",
+									"path": [
+										"electric",
+										"8ca9-b5fe18a649c8-4d24-c68cdd9a-e1ff"
+									]
+								}
+							},
+							"response": []
+						},
+						{
+							"name": "Get Internet Bills",
+							"request": {
+								"method": "GET",
+								"header": [],
+								"url": {
+									"raw": "http://localhost:8084/internet/8ca9-b5fe18a649c8-4d24-c68cdd9a-e1ff",
+									"protocol": "http",
+									"host": [
+										"localhost"
+									],
+									"port": "8084",
+									"path": [
+										"internet",
+										"8ca9-b5fe18a649c8-4d24-c68cdd9a-e1ff"
+									]
+								}
+							},
+							"response": []
+						}
+					]
+				}
+			]
+		},
+		{
+			"name": "Bill Aggregation Service",
+			"item": [
+				{
+					"name": "All Bills",
+					"request": {
+						"auth": {
+							"type": "bearer",
+							"bearer": [
+								{
+									"key": "token",
+									"value": "eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJlbWFpbCI6ImpvZUBnbWFpbC5jb20iLCJleHAiOjE3NDM3OTkwNzUsInVzZXJfaWQiOiI4MjFiN2ZhOS1mMzQ5LTQ4NjQtYTBiNi05NjZjODY3OWI3ZmIifQ.AHc6YBjClHsEngOH3GrfYDE3rg9LY3GP7DTRpebgk84",
+									"type": "string"
+								}
+							]
+						},
+						"method": "POST",
+						"header": [],
+						"body": {
+							"mode": "raw",
+							"raw": "{\n    \"action\": \"get_all_bills\"\n}",
+							"options": {
+								"raw": {
+									"language": "json"
+								}
+							}
+						},
+						"url": {
+							"raw": "http://localhost:8080/handle",
+							"protocol": "http",
+							"host": [
+								"localhost"
+							],
+							"port": "8080",
+							"path": [
+								"handle"
+							]
+						}
+					},
+					"response": []
+				},
+				{
+					"name": "Bills by Provider",
+					"request": {
+						"auth": {
+							"type": "bearer",
+							"bearer": [
+								{
+									"key": "token",
+									"value": "eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJlbWFpbCI6ImpvZUBnbWFpbC5jb20iLCJleHAiOjE3NDM3OTkwNzUsInVzZXJfaWQiOiI4MjFiN2ZhOS1mMzQ5LTQ4NjQtYTBiNi05NjZjODY3OWI3ZmIifQ.AHc6YBjClHsEngOH3GrfYDE3rg9LY3GP7DTRpebgk84",
+									"type": "string"
+								}
+							]
+						},
+						"method": "POST",
+						"header": [],
+						"body": {
+							"mode": "raw",
+							"raw": "{\n    \"action\": \"get_bills_by_provider\",\n    \"get_bills_by_provider\": {\n        \"provider_name\": \"Water Provider A\"\n    }\n}",
+							"options": {
+								"raw": {
+									"language": "json"
+								}
+							}
+						},
+						"url": {
+							"raw": "http://localhost:8080/handle",
+							"protocol": "http",
+							"host": [
+								"localhost"
+							],
+							"port": "8080",
+							"path": [
+								"handle"
+							]
+						}
+					},
+					"response": []
+				},
+				{
+					"name": "Refresh Bills",
+					"request": {
+						"auth": {
+							"type": "bearer",
+							"bearer": [
+								{
+									"key": "token",
+									"value": "eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJlbWFpbCI6ImpvZUBnbWFpbC5jb20iLCJleHAiOjE3NDM3OTkwNzUsInVzZXJfaWQiOiI4MjFiN2ZhOS1mMzQ5LTQ4NjQtYTBiNi05NjZjODY3OWI3ZmIifQ.AHc6YBjClHsEngOH3GrfYDE3rg9LY3GP7DTRpebgk84",
+									"type": "string"
+								}
+							]
+						},
+						"method": "POST",
+						"header": [],
+						"body": {
+							"mode": "raw",
+							"raw": "{\n    \"action\": \"refresh_bills\"\n}",
+							"options": {
+								"raw": {
+									"language": "json"
+								}
+							}
+						},
+						"url": {
+							"raw": "http://localhost:8080/handle",
+							"protocol": "http",
+							"host": [
+								"localhost"
+							],
+							"port": "8080",
+							"path": [
+								"handle"
+							]
+						}
+					},
+					"response": []
+				}
+			]
+		}
+	]
+}
