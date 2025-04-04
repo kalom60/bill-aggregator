@@ -25,3 +25,20 @@ func (p *ProviderServer) IsProviderExist(ctx context.Context, req *provider_prot
 		}, nil
 	}
 }
+
+func (p *ProviderServer) GetProvider(ctx context.Context, req *provider_protos.GetProviderRequest) (*provider_protos.GetProviderResponse, error) {
+	id := req.GetProviderId()
+
+	provider, err := p.client.FetchProviderByID(id)
+	if err != nil {
+		return nil, err
+	}
+
+	return &provider_protos.GetProviderResponse{
+		Id:                 provider.ID,
+		Name:               provider.Name,
+		ApiUrl:             provider.API_URL,
+		AuthenticationType: provider.Authentication_Type,
+		ApiKey:             provider.API_key,
+	}, nil
+}
