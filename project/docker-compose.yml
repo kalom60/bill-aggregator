@@ -7,6 +7,33 @@ services:
     env_file: .env
     ports:
       - "8080:80"
+    depends_on:
+      redis:
+        condition: service_healthy
+    deploy:
+      mode: replicated
+      replicas: 1
+    environment:
+      REDIS_ADDRESS: redis
+      REDIS_PASSWORD: ${REDIS_PASSWORD}
+
+  listener-service:
+    build:
+      context: ./../listener-service
+      dockerfile: ./../listener-service/listener-service.dockerfile
+    deploy:
+      mode: replicated
+      replicas: 1
+
+  mock-api-service:
+    build:
+      context: ./../mock-api-service
+      dockerfile: ./../mock-api-service/mock-api-service.dockerfile
+    restart: always
+    ports:
+      - "8084:80"
+    expose:
+      - "80"
     deploy:
       mode: replicated
       replicas: 1
@@ -19,6 +46,9 @@ services:
     env_file: .env
     ports:
       - "8081:80"
+    depends_on:
+      postgres:
+        condition: service_healthy
     deploy:
       mode: replicated
       replicas: 1
@@ -29,6 +59,7 @@ services:
       POSTGRES_PORT: ${POSTGRES_PORT}
       POSTGRES_DB: ${POSTGRES_DB}
       POSTGRES_SSLMODE: "disable"
+      DB_SCHEMA: user_service
       SECRET_KEY: ${SECRET_KEY}
 
   utility-provider-service:
@@ -39,6 +70,9 @@ services:
     env_file: .env
     ports:
       - "8082:80"
+    depends_on:
+      postgres:
+        condition: service_healthy
     deploy:
       mode: replicated
       replicas: 1
@@ -48,7 +82,49 @@ services:
       POSTGRES_HOST: ${POSTGRES_HOST}
       POSTGRES_PORT: ${POSTGRES_PORT}
       POSTGRES_DB: ${POSTGRES_DB}
+      DB_SCHEMA: provider_service
       POSTGRES_SSLMODE: "disable"
+
+  account-linking-service:
+    build:
+      context: ./../account-linking-service
+      dockerfile: ./../account-linking-service/account-linking-service.dockerfile
+    restart: always
+    env_file: .env
+    ports:
+      - "8083:80"
+    depends_on:
+      postgres:
+        condition: service_healthy
+    deploy:
+      mode: replicated
+      replicas: 1
+    environment:
+      POSTGRES_USER: ${POSTGRES_USER}
+      POSTGRES_PASSWORD: ${POSTGRES_PASSWORD}
+      POSTGRES_HOST: ${POSTGRES_HOST}
+      POSTGRES_PORT: ${POSTGRES_PORT}
+      POSTGRES_DB: ${POSTGRES_DB}
+      DB_SCHEMA: account_service
+      POSTGRES_SSLMODE: "disable"
+
+  bill-aggregation-service:
+    build:
+      context: ./../bill-aggregation-service
+      dockerfile: ./../bill-aggregation-service/bill-aggregation-service.dockerfile
+    restart: always
+    env_file: .env
+    ports:
+      - "8085:80"
+    depends_on:
+      redis:
+        condition: service_healthy
+    deploy:
+      mode: replicated
+      replicas: 1
+    environment:
+      REDIS_ADDRESS: redis
+      REDIS_PASSWORD: ${REDIS_PASSWORD}
 
   postgres:
     image: "postgres:latest"
@@ -63,5 +139,39 @@ services:
       POSTGRES_USER: ${POSTGRES_USER}
       POSTGRES_PASSWORD: ${POSTGRES_PASSWORD}
       POSTGRES_DB: ${POSTGRES_DB}
+
+      USER_SERVICE_PASSWORD: ${USER_SERVICE_PASSWORD}
+      PROVIDER_SERVICE_PASSWORD: ${PROVIDER_SERVICE_PASSWORD}
+      ACCOUNT_SERVICE_PASSWORD: ${ACCOUNT_SERVICE_PASSWORD}
     volumes:
       - ./db-data/postgres/:/var/lib/postgresql/data/
+      - ./init-scripts:/docker-entrypoint-initdb.d
+    healthcheck:
+      test: ["CMD-SHELL", "pg_isready -U ${POSTGRES_USER} -d ${POSTGRES_DB}"]
+      interval: 10s
+      timeout: 5s
+      retries: 5
+
+  redis:
+    image: redis:7.2.4
+    restart: always
+    ports:
+      - "6379:6379"
+    environment:
+      REDIS_ADDRESS: ${REDIS_ADDRESS}
+      REDIS_PASSWORD: ${REDIS_PASSWORD}
+    healthcheck:
+      test: ["CMD", "redis-cli", "ping"]
+      interval: 10s
+      timeout: 5s
+      retries: 5
+
+  rabbitmq:
+    image: "rabbitmq:3.13-alpine"
+    ports:
+      - "5672:5672"
+    deploy:
+      mode: replicated
+      replicas: 1
+    volumes:
+      - ./db-data/rabbitmq/:/var/lib/rabbitmq/
