@@ -5,8 +5,10 @@ import (
 	"encoding/json"
 	"fmt"
 	"net/http"
+	"net/url"
 
 	"github.com/gin-gonic/gin"
+	"github.com/kalom60/bill-aggregator/broker/internal/event"
 	"github.com/kalom60/bill-aggregator/broker/pkg/middlewares"
 )
 
@@ -17,6 +19,7 @@ type RequestPayload struct {
 	CreateProvider      CreateProviderPayload      `json:"create_provider,omitempty"`
 	LinkAccount         LinkAccountPayload         `json:"link_account,omitempty"`
 	DeleteLinkedAccount DeleteLinkedAccountPayload `json:"delete_linked_account,omitempty"`
+	GetBillsByProvider  GetBillsByProviderPayload  `json:"get_bills_by_provider,omitempty"`
 }
 
 type JsonResponse struct {
@@ -53,6 +56,10 @@ type LinkAccountPayload struct {
 
 type DeleteLinkedAccountPayload struct {
 	AccountID string `json:"account_id"`
+}
+
+type GetBillsByProviderPayload struct {
+	ProviderName string `json:"provider_name"`
 }
 
 func (app *Config) Broker(c *gin.Context) {
@@ -113,6 +120,48 @@ func (app *Config) HandleSubmission(c *gin.Context) {
 		app.GetLinkedAcounts(c, userIDStr)
 	case "delete_linked_account":
 		app.DeleteLinkedAccount(c, req.DeleteLinkedAccount)
+	case "get_all_bills":
+		user_id, exists := c.Get("userID")
+		if !exists {
+			c.JSON(http.StatusInternalServerError, gin.H{"error": true, "message": "Authentication failed"})
+			return
+		}
+
+		userIDStr, ok := user_id.(string)
+		if !ok {
+			c.JSON(http.StatusInternalServerError, gin.H{"error": true, "message": "Invalid user ID format"})
+			return
+		}
+
+		app.GetAllBills(c, userIDStr)
+	case "get_bills_by_provider":
+		user_id, exists := c.Get("userID")
+		if !exists {
+			c.JSON(http.StatusInternalServerError, gin.H{"error": true, "message": "Authentication failed"})
+			return
+		}
+
+		userIDStr, ok := user_id.(string)
+		if !ok {
+			c.JSON(http.StatusInternalServerError, gin.H{"error": true, "message": "Invalid user ID format"})
+			return
+		}
+
+		app.GetBillsByProvider(c, userIDStr, req.GetBillsByProvider)
+	case "refresh_bills":
+		user_id, exists := c.Get("userID")
+		if !exists {
+			c.JSON(http.StatusInternalServerError, gin.H{"error": true, "message": "Authentication failed"})
+			return
+		}
+
+		userIDStr, ok := user_id.(string)
+		if !ok {
+			c.JSON(http.StatusInternalServerError, gin.H{"error": true, "message": "Invalid user ID format"})
+			return
+		}
+
+		app.refreshBillsViaRabbit(c, userIDStr)
 	default:
 		c.JSON(http.StatusBadRequest, gin.H{"error": true, "message": "Unknown action"})
 	}
@@ -146,6 +195,16 @@ func (app *Config) GetLinkedAcounts(c *gin.Context, userID string) {
 func (app *Config) DeleteLinkedAccount(c *gin.Context, payload DeleteLinkedAccountPayload) {
 	url := fmt.Sprintf("http://account-linking-service/accounts/%s", payload.AccountID)
 	app.forwardRequest(c, "DELETE", url, nil)
+}
+
+func (app *Config) GetAllBills(c *gin.Context, userID string) {
+	url := fmt.Sprintf("http://bill-aggregation-service/bills/%s", userID)
+	app.forwardRequest(c, "GET", url, nil)
+}
+
+func (app *Config) GetBillsByProvider(c *gin.Context, userID string, payload GetBillsByProviderPayload) {
+	url := fmt.Sprintf("http://bill-aggregation-service/bills/%s/provider?name=%s", userID, url.QueryEscape(payload.ProviderName))
+	app.forwardRequest(c, "GET", url, nil)
 }
 
 func (app *Config) forwardRequest(c *gin.Context, method, url string, payload any) {
@@ -187,4 +246,43 @@ func (app *Config) forwardRequest(c *gin.Context, method, url string, payload an
 	}
 
 	c.JSON(http.StatusOK, gin.H{"error": false, "message": "Success", "data": jsonResponse.Data})
+}
+
+type RefreshBillsPayload struct {
+	UserID string `json:"user_id"`
+}
+
+func (app *Config) refreshBillsViaRabbit(c *gin.Context, userID string) {
+	err := app.pushToQueue(userID)
+	if err != nil {
+		c.JSON(http.StatusInternalServerError, gin.H{
+			"error":   true,
+			"message": "Failed to refresh bills",
+		})
+		return
+	}
+
+	c.JSON(http.StatusOK, gin.H{
+		"error":   false,
+		"message": "bills refreshed successfully",
+	})
+}
+
+func (app *Config) pushToQueue(userID string) error {
+	emitter, err := event.NewEventEmitter(app.Rabbit)
+	if err != nil {
+		return err
+	}
+
+	payload := RefreshBillsPayload{
+		UserID: userID,
+	}
+
+	j, _ := json.MarshalIndent(&payload, "", "\t")
+	err = emitter.Push(string(j), "bill.INFO")
+	if err != nil {
+		return err
+	}
+
+	return nil
 }
