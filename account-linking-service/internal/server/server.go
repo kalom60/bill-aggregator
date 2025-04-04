@@ -17,7 +17,7 @@ type Server struct {
 	handler handler.Handler
 }
 
-func NewServer() *http.Server {
+func NewServer() *Server {
 	db := database.New()
 
 	gRPCClient, err := grpc.NewProviderClient("utility-provider-service:50001")
@@ -28,16 +28,21 @@ func NewServer() *http.Server {
 
 	handler := handler.NewHandler(db, gRPCClient)
 
-	NewServer := &Server{
+	return &Server{
 		port:    80,
 		db:      db,
 		handler: handler,
 	}
+}
+
+func (s *Server) ListenAndServe() error {
+	go grpc.StartGRPCListen(s.db)
 
 	server := &http.Server{
-		Addr:    fmt.Sprintf(":%d", NewServer.port),
-		Handler: NewServer.RegisterRoutes(),
+		Addr:    fmt.Sprintf(":%d", s.port),
+		Handler: s.RegisterRoutes(),
 	}
 
-	return server
+	fmt.Printf("HTTP server running on port %d\n", s.port)
+	return server.ListenAndServe()
 }
