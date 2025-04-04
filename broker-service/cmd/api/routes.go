@@ -2,13 +2,19 @@ package main
 
 import (
 	"net/http"
+	"time"
 
 	"github.com/gin-contrib/cors"
 	"github.com/gin-gonic/gin"
+	"github.com/kalom60/bill-aggregator/broker/pkg/middlewares"
 )
 
 func (app *Config) RegisterRoutes() http.Handler {
 	r := gin.Default()
+
+	middlewares.InitRedis()
+
+	r.Use(middlewares.RateLimiterMiddleware(10, time.Minute))
 
 	r.Use(cors.New(cors.Config{
 		AllowOrigins:     []string{"*"},
