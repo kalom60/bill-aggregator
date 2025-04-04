@@ -1,0 +1,21 @@
+syntax = "proto3";
+
+package account;
+
+option go_package = "github.com/kalom60/bill-aggregator/utility-provider-service/pb/account-protos";
+
+service AccountService {
+  rpc GetLinkedAccounts(AccountRequest) returns (AccountResponse);
+}
+
+message AccountRequest { string user_id = 1; }
+
+message AccountResponse { repeated LinkedAccount accounts = 1; }
+
+message LinkedAccount {
+  string id = 1;
+  string user_id = 2;
+  string provider_id = 3;
+  string account_identifier = 4;
+  string encrypted_credential = 5;
+}
