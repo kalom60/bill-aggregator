@@ -38,7 +38,7 @@ func (h *handler) LinkAccount(c *gin.Context) {
 
 	req := validatedAccount.(models.Account)
 
-	exists, err := h.gRPCClient.IsProviderExist(req.ProviderID)
+	exists, err := h.gRPCClient.IsProviderExist(c.Request.Context(), req.ProviderID)
 	if err != nil {
 		fmt.Println("error 1", err)
 		c.JSON(http.StatusInternalServerError, gin.H{"error": true, "message": "Failed to validate provider"})
