@@ -2,9 +2,8 @@ package grpc
 
 import (
 	"context"
-	"time"
 
-	provider_protos "github.com/kalom60/bill-aggregator/account-linking-service/internal/grpc/pb"
+	provider_protos "github.com/kalom60/bill-aggregator/account-linking-service/internal/grpc/pb/provider-protos"
 	"google.golang.org/grpc"
 	"google.golang.org/grpc/credentials/insecure"
 )
@@ -32,10 +31,7 @@ func (c *ProviderClient) Close() {
 	}
 }
 
-func (c *ProviderClient) IsProviderExist(providerID string) (bool, error) {
-	ctx, cancel := context.WithTimeout(context.Background(), 5*time.Second)
-	defer cancel()
-
+func (c *ProviderClient) IsProviderExist(ctx context.Context, providerID string) (bool, error) {
 	req := &provider_protos.ProviderRequest{ProviderId: providerID}
 	resp, err := c.client.IsProviderExist(ctx, req)
 	if err != nil {
